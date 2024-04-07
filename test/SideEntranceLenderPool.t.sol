@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity ^0.8.13;
 
-import {Utilities} from "../../utils/Utilities.sol";
 import "forge-std/Test.sol";
 
+import {Utilities} from "../utils/Utilities.sol";
 import {SideEntranceLenderPool} from "../src/SideEntranceLenderPool.sol";
+import {Exploit} from "../src/Exploit.sol";
 
 contract SideEntrance is Test {
     uint256 internal constant ETHER_IN_POOL = 1_000e18;
@@ -36,7 +37,20 @@ contract SideEntrance is Test {
         /**
          * EXPLOIT START *
          */
+        vm.startPrank(attacker);
+        console.log(
+            "Initial Balance of pool:",
+            address(sideEntranceLenderPool).balance / 1e18
+        );
+        console.log(
+            "Initial Balance of player:",
+            address(attacker).balance / 1e18
+        );
 
+        Exploit exploit = new Exploit(address(sideEntranceLenderPool));
+        exploit.attack(ETHER_IN_POOL);
+        exploit.withdraw();
+        vm.stopPrank();
         /**
          * EXPLOIT END *
          */
